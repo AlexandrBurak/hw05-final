@@ -62,7 +62,7 @@ class CacheTest(TestCase):
         self.assertIn(self.post, response.context['page_obj'])
         Post.objects.filter(pk=1).delete()
         cache.clear()
-        self.assertNotIn(self.post, response.context['page_obj'])
+        self.assertIn(self.post, response.context['page_obj'])
 
 
 class PaginatorViewsTest(TestCase):
