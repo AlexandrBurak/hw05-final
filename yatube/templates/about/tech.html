@@ -1,0 +1,34 @@
+<!-- templates/about/tech.html -->
+{% extends "base.html" %}
+{% block title %}Технологии{% endblock %}
+{% block content %}
+    <main> 
+      <!-- класс py-5 создает отступы сверху и снизу блока -->
+      <div class="container py-5">     
+        <h1>
+          {% block head_text %}
+            Вот что я умею
+          {% endblock %}
+        </h1>
+        <aside class="col-12 col-md-3">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    Python
+                </li>
+                <li class="list-group-item">
+                    Django
+                </li>
+            </ul>
+        </aside>
+        <p>
+          {% block GroupName %}
+          {% endblock %}
+        </p>
+        <article class="col-12 col-md-9">
+          {% block GroupList %}
+            <p>Текст страницы "Технологии"</p>
+          {% endblock %}       
+        </article>
+      </div>  
+    </main>  
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Об авторе проекта{% endblock %}
+{% block content %}
+    <main> 
+      <!-- класс py-5 создает отступы сверху и снизу блока -->
+      <div class="container py-5">     
+        <h1>
+          {% block head_text %}
+            Привет, я автор
+          {% endblock %}
+        </h1>
+        <p>
+          {% block GroupName %}
+          {% endblock %}
+        </p>
+        <article>
+          <p>
+            Тут я размещу информацию о себе используя свои умения верстать.
+            Картинки, блоки, элементы бустрап. А может быть, просто напишу несколько абзацев текста. 
+          </p>
+        </article>
+      </div>  
+    </main>  
+{% endblock %}

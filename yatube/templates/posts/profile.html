@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Профайл пользователя {{ username }}{% endblock title %}
+{% load thumbnail %}
+{% block content %}
+<main> 
+      <div class="container py-5">     
+        <h1>
+          Все посты пользователя {% if page_author.author.get_full_name %}
+          {{ page_author.get_full_name }}
+        {% else %}
+          {{ page_author.username }}
+        {% endif %}
+        </h1>
+        <h3>Всего постов: {{ count }} </h3> 
+        <div class="mb-5">
+          {% if following %}
+            <a
+              class="btn btn-lg btn-light"
+              href="{% url 'posts:profile_unfollow' author.username %}" role="button"
+            >
+              Отписаться
+            </a>
+          {% else %}
+              <a
+                class="btn btn-lg btn-primary"
+                href="{% url 'posts:profile_follow' author.username %}" role="button"
+              >
+                Подписаться
+              </a>
+           {% endif %}
+        </div>
+        <article>
+            {% for post in page_obj %}
+              <ul>
+                <li>
+                  Автор: 
+                  {% if post.author.get_full_name %}
+                    {{ post.author.get_full_name }}
+                  {% else %}
+                    {{ post.author.username }}
+                  {% endif %}
+                </li>
+                <li>
+                  Дата публикации: {{ post.pub_date|date:"d E Y" }}
+                </li>
+              </ul>      
+              <p>
+                {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
+                  <img class="card-img my-2" src="{{ post.image.url }}">
+                {% endthumbnail %}
+                {{ post.text|linebreaksbr }}
+              </p>
+              <a href="{% url 'posts:post_detail' post.pk %}">подробная информация </a>
+              <br>
+              {% if post.group.slug %}
+                <a href="{% url 'posts:group_list' post.group.slug %}">
+                  все записи группы
+                </a>
+              {% endif %}
+              {% if not forloop.last %}
+                <hr>
+              {% endif %}
+            {% endfor %} 
+            {% include 'posts/includes/paginator.html' %} 
+        </article>
+      </div>  
+    </main>  
+{% endblock content %}
+
