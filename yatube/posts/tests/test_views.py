@@ -24,14 +24,27 @@ class FollowTest(TestCase):
         cls.author = User.objects.create_user(username='author')
 
     def setUp(self):
-        user = FollowTest.user
         self.client = Client()
-        self.client.force_login(user)
+        self.nofl_client = Client()
+        self.client.force_login(FollowTest.user)
+        self.nofl_client.force_login(FollowTest.author)
 
     def test_follow_unfollow_view(self):
         self.client.get(reverse('posts:profile_follow',
                                 kwargs={'username': 'author'}))
         self.assertTrue(Follow.objects.filter(pk=1).exists())
+        self.client.get(reverse('posts:profile_unfollow',
+                                kwargs={'username': 'author'}))
+        self.assertFalse(Follow.objects.filter(pk=1).exists())
+
+    def test_follow_view(self):
+        self.client.get(reverse('posts:profile_follow',
+                                kwargs={'username': 'author'}))
+        self.assertTrue(Follow.objects.filter(pk=1).exists())
+
+    def test_unfollow_view(self):
+        self.client.get(reverse('posts:profile_follow',
+                                kwargs={'username': 'author'}))
         self.client.get(reverse('posts:profile_unfollow',
                                 kwargs={'username': 'author'}))
         self.assertFalse(Follow.objects.filter(pk=1).exists())
@@ -42,6 +55,13 @@ class FollowTest(TestCase):
                                 kwargs={'username': 'author'}))
         response = self.client.get(reverse('posts:follow_index'))
         self.assertEqual(response.context['page_obj'][0], post)
+
+    def test_create_post_for_nofollowers(self):
+        post = Post.objects.create(author=FollowTest.author, text='Text')
+        self.client.get(reverse('posts:profile_follow',
+                                kwargs={'username': 'author'}))
+        response = self.nofl_client.get(reverse('posts:follow_index'))
+        self.assertNotIn(post, response.context['page_obj'])
 
 
 class CacheTest(TestCase):
@@ -62,7 +82,8 @@ class CacheTest(TestCase):
         self.assertIn(self.post, response.context['page_obj'])
         Post.objects.filter(pk=1).delete()
         cache.clear()
-        self.assertIn(self.post, response.context['page_obj'])
+        response = self.client.get(reverse('posts:index'))
+        self.assertNotIn(self.post, response.context['page_obj'])
 
 
 class PaginatorViewsTest(TestCase):

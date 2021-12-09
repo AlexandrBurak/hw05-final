@@ -8,13 +8,17 @@ from .models import Group, Post, User, Follow
 OUT_LIMIT = 10
 
 
-def index(request):
-    posts = Post.objects.all()
-    paginator = Paginator(posts, OUT_LIMIT)
+def Pagination_func(objects, request):
+    paginator = Paginator(objects, OUT_LIMIT)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    return page_obj
+
+
+def index(request):
+    posts = Post.objects.all()
     context = {
-        'page_obj': page_obj,
+        'page_obj': Pagination_func(posts, request),
         'title': 'Последние обновления на сайте',
     }
     return render(request, 'posts/index.html', context)
@@ -23,53 +27,40 @@ def index(request):
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
     posts = group.posts.all().order_by('-pub_date')
-    paginator = Paginator(posts, OUT_LIMIT)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
     context = {
         'title': f'Записи сообщества {group}',
-        'page_obj': page_obj,
+        'page_obj': Pagination_func(posts, request),
         'group': group,
     }
     return render(request, 'posts/group_list.html', context)
 
 
 def profile(request, username):
+    user = get_object_or_404(User, username=username)
+    posts = user.posts.all()
+    count = posts.count()
     if request.user.is_authenticated:
-        user = get_object_or_404(User, username=username)
-        posts = user.posts.all()
-        count = posts.count()
-        paginator = Paginator(posts, OUT_LIMIT)
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
         following = False
         filter_obj_st = Follow.objects.filter(user=request.user)
         if filter_obj_st.filter(author=user).exists():
             following = True
         context = {
             'author': user,
-            'page_obj': page_obj,
+            'page_obj': Pagination_func(posts, request),
             'title': f'Профайл пользователя {username}',
             'count': count,
             'following': following,
             'page_author': user
         }
-        return render(request, 'posts/profile.html', context)
     else:
-        user = get_object_or_404(User, username=username)
-        posts = user.posts.all()
-        count = posts.count()
-        paginator = Paginator(posts, OUT_LIMIT)
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
         context = {
             'author': user,
-            'page_obj': page_obj,
+            'page_obj': Pagination_func(posts, request),
             'title': f'Профайл пользователя {username}',
             'count': count,
             'page_author': user
         }
-        return render(request, 'posts/profile.html', context)
+    return render(request, 'posts/profile.html', context)
 
 
 def post_detail(request, post_id):
@@ -137,13 +128,9 @@ def add_comment(request, post_id):
 @login_required
 def follow_index(request):
     follows = request.user.follower.all()
-    posts = []
-    for follow in follows:
-        posts = posts + list(Post.objects.filter(author=follow.author))
-    paginator = Paginator(posts, OUT_LIMIT)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    context = {'page_obj': page_obj}
+    auth_list = [follow.author for follow in follows]
+    posts = Post.objects.filter(author__in=auth_list)
+    context = {'page_obj': Pagination_func(posts, request)}
     return render(request, 'posts/follow.html', context)
 
 
