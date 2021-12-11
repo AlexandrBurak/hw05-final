@@ -29,37 +29,29 @@ class FollowTest(TestCase):
         self.client.force_login(FollowTest.user)
         self.nofl_client.force_login(FollowTest.author)
 
-    def test_follow_unfollow_view(self):
-        self.client.get(reverse('posts:profile_follow',
-                                kwargs={'username': 'author'}))
-        self.assertTrue(Follow.objects.filter(pk=1).exists())
-        self.client.get(reverse('posts:profile_unfollow',
-                                kwargs={'username': 'author'}))
-        self.assertFalse(Follow.objects.filter(pk=1).exists())
-
     def test_follow_view(self):
+        fltr_obj = (Follow.objects.filter(user=FollowTest.user).
+                    filter(author=FollowTest.author))
+        self.assertFalse(fltr_obj.exists())
         self.client.get(reverse('posts:profile_follow',
                                 kwargs={'username': 'author'}))
-        self.assertTrue(Follow.objects.filter(pk=1).exists())
+        self.assertTrue(fltr_obj.exists())
 
     def test_unfollow_view(self):
-        self.client.get(reverse('posts:profile_follow',
-                                kwargs={'username': 'author'}))
-        self.client.get(reverse('posts:profile_unfollow',
-                                kwargs={'username': 'author'}))
-        self.assertFalse(Follow.objects.filter(pk=1).exists())
+        Follow.objects.create(user=FollowTest.user, author=FollowTest.author)
+        (Follow.objects.filter(user=FollowTest.user).
+         filter(author=FollowTest.author)).delete()
+        self.assertFalse(Follow.objects.filter(user=FollowTest.user).
+                         filter(author=FollowTest.author).exists())
 
     def test_create_post_for_followers(self):
         post = Post.objects.create(author=FollowTest.author, text='Text')
-        self.client.get(reverse('posts:profile_follow',
-                                kwargs={'username': 'author'}))
+        Follow.objects.create(user=FollowTest.user, author=FollowTest.author)
         response = self.client.get(reverse('posts:follow_index'))
         self.assertEqual(response.context['page_obj'][0], post)
 
     def test_create_post_for_nofollowers(self):
         post = Post.objects.create(author=FollowTest.author, text='Text')
-        self.client.get(reverse('posts:profile_follow',
-                                kwargs={'username': 'author'}))
         response = self.nofl_client.get(reverse('posts:follow_index'))
         self.assertNotIn(post, response.context['page_obj'])
 
@@ -77,13 +69,19 @@ class CacheTest(TestCase):
         self.post = Post.objects.create(author=CacheTest.user,
                                         text='Test Post')
 
-    def test_cache_view(self):
+    def test_cache_view_nosave(self):
         response = self.client.get(reverse('posts:index'))
         self.assertIn(self.post, response.context['page_obj'])
         Post.objects.filter(pk=1).delete()
         cache.clear()
         response = self.client.get(reverse('posts:index'))
         self.assertNotIn(self.post, response.context['page_obj'])
+
+    def test_cache_view_save(self):
+        response = self.client.get(reverse('posts:index'))
+        self.assertIn(self.post, response.context['page_obj'])
+        Post.objects.filter(pk=1).delete()
+        self.assertIn(self.post, response.context['page_obj'])
 
 
 class PaginatorViewsTest(TestCase):
@@ -212,13 +210,11 @@ class PostPagesTests(TestCase):
                                               kwargs={'username': 'author'}))
         test_author = response.context['author']
         test_obj = response.context['page_obj'][0]
-        test_title = response.context['title']
         test_count = response.context['count']
         self.assertEqual(test_author, PostPagesTests.user)
         self.assertEqual(test_obj.text, PostPagesTests.post.text)
         self.assertEqual(test_obj.author, PostPagesTests.user)
         self.assertEqual(test_obj.image, PostPagesTests.post.image)
-        self.assertEqual(test_title, 'Профайл пользователя author')
         self.assertEqual(test_count, 1)
 
     def test_post_detail_correct_context(self):

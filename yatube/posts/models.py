@@ -69,3 +69,13 @@ class Follow(models.Model):
     author = models.ForeignKey(User,
                                related_name='following',
                                on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'author'],
+                                    name='unique-in-follow'),
+        ]
+
+    def __str__(self):
+        return (f'Пользователь {self.user.username} подписан на '
+                f'пользователя {self.author.username}')
