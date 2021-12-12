@@ -39,19 +39,16 @@ def profile(request, username):
     user = get_object_or_404(User, username=username)
     posts = user.posts.all()
     count = posts.count()
+    following = (request.user.is_authenticated
+                 and Follow.objects.filter(user=request.user).
+                 filter(author=user).exists())
     context = {
         'author': user,
         'page_obj': pagination_func(posts, request),
         'count': count,
-        'following': None,
+        'following': following,
         'page_author': user
     }
-    if request.user.is_authenticated:
-        following = False
-        fltr_obj = Follow.objects.filter(user=request.user).filter(author=user)
-        if fltr_obj.exists():
-            following = True
-        context['following'] = following
     return render(request, 'posts/profile.html', context)
 
 

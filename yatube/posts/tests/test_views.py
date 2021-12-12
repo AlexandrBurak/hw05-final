@@ -39,8 +39,8 @@ class FollowTest(TestCase):
 
     def test_unfollow_view(self):
         Follow.objects.create(user=FollowTest.user, author=FollowTest.author)
-        (Follow.objects.filter(user=FollowTest.user).
-         filter(author=FollowTest.author)).delete()
+        self.client.get(reverse('posts:profile_unfollow',
+                                kwargs={'username': 'author'}))
         self.assertFalse(Follow.objects.filter(user=FollowTest.user).
                          filter(author=FollowTest.author).exists())
 
