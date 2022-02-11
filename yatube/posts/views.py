@@ -70,7 +70,7 @@ def post_detail(request, post_id):
 @login_required
 def post_create(request):
     form = PostForm(request.POST or None,
-                    files=request.FILES or None,)
+                    files=request.FILES or None, )
     if request.method == "POST":
         if form.is_valid():
             post = form.save(commit=False)
@@ -91,7 +91,7 @@ def post_edit(request, post_id):
         return redirect('posts:post_detail', post_id=post_id)
     form = PostForm(request.POST or None,
                     files=request.FILES or None,
-                    instance=instance,)
+                    instance=instance, )
     if form.is_valid():
         form.save()
         return redirect('posts:post_detail', post_id=post_id)

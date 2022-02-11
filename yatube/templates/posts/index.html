@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load thumbnail %}
+{% load static %}
 {% block content %}
 <main> 
       <!-- класс py-5 создает отступы сверху и снизу блока -->
@@ -14,7 +15,7 @@
           {% for post in page_obj %}
             {% include 'posts/includes/post.html' %} 
           {% endfor %}
-            {% endcache %} 
+          {% endcache %} 
             {% include 'posts/includes/paginator.html' %} 
         </article>
       </div>  

@@ -6,7 +6,11 @@ SECRET_KEY = 'l7gc!s@(p@2tqoew7^43$yiwi!$ra&-dxfe^fj!tvgqf3gb*le'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']
+ALLOWED_HOSTS = ['127.0.0.1',
+                 'localhost',
+                 'testserver',
+                 'www.axndrburak.pythonanywhere.com',
+                 'axndrburak.pythonanywhere.com']
 
 INSTALLED_APPS = [
     'posts.apps.PostsConfig',
@@ -20,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'sorl.thumbnail',
+    'debug_toolbar',
 
 ]
 
@@ -31,6 +36,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'yatube.urls'
@@ -109,3 +115,9 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+    'localhost',
+    'testserver'
+]
