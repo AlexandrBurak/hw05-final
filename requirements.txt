@@ -3,7 +3,7 @@ attrs==21.2.0
 certifi==2021.10.8
 charset-normalizer==2.0.9
 colorama==0.4.4
-Django==2.2
+Django==2.2.27
 django-debug-toolbar==2.2
 Faker==10.0.0
 flake8==4.0.1
